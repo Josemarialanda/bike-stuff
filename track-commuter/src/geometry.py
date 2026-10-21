@@ -106,25 +106,6 @@ class Geometry:
         # The belt centre distance is BB-to-axle, i.e. the chainstay length.
         return cd
 
-    def brake_bridge(self):
-        """Point on the seat-stay centreline where the 12.7 mm bridge clears the
-        tyre by BRAKE_BRIDGE_TYRE_GAP with the axle at the front of the slot."""
-        axle = self.rear_axle(P.CHAINSTAY_MIN)
-        a, b = self.rear_axle(P.CHAINSTAY_NOMINAL), self.ss_top
-        target = self.tyre_radius + P.BRAKE_BRIDGE_TYRE_GAP + 12.7 / 2
-        lo, hi = 0.0, 1.0
-        for _ in range(60):
-            m = (lo + hi) / 2
-            if np.linalg.norm(a + m * (b - a) - axle) < target:
-                lo = m
-            else:
-                hi = m
-        return a + hi * (b - a)
-
-    def brake_reach(self, cs):
-        return float(np.linalg.norm(self.brake_bridge() - self.rear_axle(cs))
-                     - P.RIM_BRAKE_TRACK_RADIUS)
-
     def effective_top_tube(self):
         """Horizontal seat-axis to steering-axis distance at stack height."""
         x_seat = self.u_st[0] * (P.STACK / self.u_st[1])
@@ -147,7 +128,6 @@ class Geometry:
                 "chainstay": cs,
                 "wheelbase": round(self.wheelbase(cs), 1),
                 "seat_tube_tyre_gap": round(self.seat_tube_tyre_gap(cs), 1),
-                "rear_brake_reach": round(self.brake_reach(cs), 1),
             })
         return {
             "bb_drop": round(self.bb_drop, 1),

@@ -223,9 +223,14 @@ def side_elevation(model, stem):
     foot = crown + g.u_ht * float(np.dot(fa - crown, g.u_ht))
     sh.dim_aligned(crown, fa, -130, text="<> A-C (fork, ref.)")
     sh.dim_aligned(foot, fa, 0, text="<> offset")
-    # Brake bridge and bottle bosses.
-    bb_pt = g.brake_bridge()
-    sh.dim_aligned(ax_nom, bb_pt, -45, text="<> to brake bolt")
+    # Rear disc (reference): 160 rotor and caliper envelope ride on the slider.
+    sh.circle(ax_nom, P.ROTOR_REAR / 2)
+    cvis, _ = hlr_edges(model.caliper_envelope(P.CHAINSTAY_NOMINAL), (0, 0, 1), (1, 0, 0))
+    sh.polylines(cvis, "REFERENCE")
+    for side in (+1,):
+        svis, _ = hlr_edges(model.slider(side, P.CHAINSTAY_NOMINAL), (0, 0, 1), (1, 0, 0))
+        sh.polylines(svis, "REFERENCE")
+    # Bottle bosses.
     d = g.dt_front / np.linalg.norm(g.dt_front)
     b1 = d * P.BOTTLE_BOSS_FROM_BB
     b2 = d * (P.BOTTLE_BOSS_FROM_BB + P.BOTTLE_BOSS_SPACING)
@@ -246,7 +251,10 @@ def side_elevation(model, stem):
         f"{P.FRONT_TEETH}T/{P.REAR_TEETH_FREEWHEEL}T + {P.BELT_TEETH}T belt sits at {s['belt_cs_60_22']}.",
         f"5. Trail {s['trail']} mm. Toe overlap approx. {s['toe_overlap_est']:.0f} mm "
         "(170 cranks) - expected with track geometry and large tyres.",
-        "6. Fork, wheels and sprockets shown as reference only (phantom). DXF is 1:1 - do not scale the PDF.",
+        f"6. Brakes: hydraulic disc. Rear {P.REAR_BRAKE_MOUNT}; front {P.FRONT_BRAKE_MOUNT} on a "
+        f"{P.FRONT_AXLE} fork.",
+        "7. Fork, wheels, sprockets, sliders, rotor and caliper are reference only (phantom). DXF is 1:1 - "
+        "do not scale the PDF.",
     ])
     sh.frame_and_title(notes)
     sh.save(stem)
@@ -297,30 +305,34 @@ def rear_end(model, stem):
     sh.dim_linear((-110, zy(zt - ow / 2)), (-110, zy(-zt + ow / 2)), (-150, 0), angle=90,
                   text=f"<> CS gap ({ow:g} wide crimp)")
 
-    # Dropout detail (side view, drive side), shifted below the plan view.
+    # Sliding dropout detail (side view, drive side), shifted below the plan view.
     dy = -230.0
     dx = 0.0
     plate = model.dropout_plate(+1)
     dvis, _ = hlr_edges(plate, (0, 0, 1), (1, 0, 0))
     sh.polylines(dvis, "FRAME", offset=(dx, dy))
+    svis, _ = hlr_edges(model.slider(+1, P.CHAINSTAY_NOMINAL), (0, 0, 1), (1, 0, 0))
+    sh.polylines(svis, "REFERENCE", offset=(dx, dy))
     a_min, a_max = model.axle_min, model.axle_max
     for cs, a in ((P.CHAINSTAY_MIN, a_min), (P.CHAINSTAY_NOMINAL, ax_nom), (P.CHAINSTAY_MAX, a_max)):
         c = (a[0] + dx, a[1] + dy)
         sh.circle(c, 4.75, "CENTER")
         sh.line((c[0], c[1] - 8), (c[0], c[1] + 8))
-    sh.line((a_max[0] - 30 + dx, g.bb_drop + dy), (a_min[0] + 60 + dx, g.bb_drop + dy))
+    sh.line((a_max[0] - 40 + dx, g.bb_drop + dy), (a_min[0] + 70 + dx, g.bb_drop + dy))
     sh.dim_linear((a_max[0] + dx, g.bb_drop + dy), (a_min[0] + dx, g.bb_drop + dy),
-                  (0, g.bb_drop + dy - 32), text=f"<> axle travel (CS {P.CHAINSTAY_MAX:g} - {P.CHAINSTAY_MIN:g})")
-    sh.dim_linear((a_min[0] + 20 + dx, g.bb_drop + dy - P.AXLE_SLOT_WIDTH / 2),
-                  (a_min[0] + 20 + dx, g.bb_drop + dy + P.AXLE_SLOT_WIDTH / 2),
-                  (a_min[0] + 75 + dx, 0), angle=90, text="<> slot")
-    sh.text("DROPOUT DETAIL (DRIVE SIDE, OUTSIDE VIEW)\n6Al-4V plate, 6 mm, horizontal rear-facing slot\n"
+                  (0, g.bb_drop + dy - 45),
+                  text=f"<> slider travel (CS {P.CHAINSTAY_MIN:g} - {P.CHAINSTAY_MAX:g})")
+    bx, by = P.SLIDER_BOLT_TOP
+    sh.dim_linear((a_min[0] + dx, g.bb_drop + dy), (a_min[0] + bx + dx, g.bb_drop + by + dy),
+                  (a_min[0] + 75 + dx, 0), angle=90, text="<> bolt")
+    sh.text("SLIDING DROPOUT DETAIL (DRIVE SIDE, OUTSIDE VIEW)\n"
+            f"Frame: 6Al-4V receiver plate, {P.DROPOUT_THICKNESS:g} mm, window + 2 x M6 slots "
+            f"({P.SLIDER_BOLT_SLOT_WIDTH:g} wide)\n"
+            "Slider (phantom, bought-in): axle in vertical slot; non-drive slider carries the post mount\n"
             f"Axle marks: CS {P.CHAINSTAY_MIN:g} / {P.CHAINSTAY_NOMINAL:g} ({P.BELT_TEETH}T belt) / "
-            f"{P.CHAINSTAY_MAX:g}", (a_max[0] - 40 + dx, g.bb_drop + dy + 75))
+            f"{P.CHAINSTAY_MAX:g}", (a_max[0] - 60 + dx, g.bb_drop + dy + 95))
     sh.text("PLAN VIEW FROM ABOVE (front to the right, drive side down)", (-430, zy(-95)))
 
-    reach_lo = g.brake_reach(P.CHAINSTAY_MIN)
-    reach_hi = g.brake_reach(P.CHAINSTAY_MAX)
     notes = "\n".join([
         "NOTES",
         f"1. Chainstays {P.CHAINSTAY[0]} x {P.CHAINSTAY[1]} crimped to {P.CHAINSTAY_OVAL[0]:g} x "
@@ -330,8 +342,11 @@ def rear_end(model, stem):
         "cog clear the drive-side stays.",
         "3. Belt drive requires a frame split: bolted splitter in the drive-side seat stay (shown), "
         "or a split dropout per builder's standard.",
-        f"4. Rear brake bridge: 12.7 x 1.0 tube, 6 mm bolt hole, {P.BRAKE_BRIDGE_TYRE_GAP:g} mm above the "
-        f"tyre; caliper reach {reach_lo:.0f}-{reach_hi:.0f} mm over the slot.",
+        f"4. Sliding dropouts tension the belt and carry the rear {P.REAR_BRAKE_MOUNT}; "
+        f"{P.ROTOR_REAR:g} rotor on the non-drive side. Rotor and caliper clear the frame by "
+        f">= {P.DISC_CLEARANCE_MIN:g} mm over the full travel. No rim-brake bridge.",
+        "5. Rear hose: internal through top tube (6 mm ports, non-drive side), then along the non-drive "
+        "seat stay on 2 x M4 guide bosses.",
     ])
     sh.frame_and_title(notes)
     sh.save(stem)

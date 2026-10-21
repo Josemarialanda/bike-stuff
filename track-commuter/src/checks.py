@@ -66,7 +66,7 @@ def belt_gaps(samples, axle):
     return worst
 
 
-def run_checks(model):
+def run_checks(model, frame=None):
     g = model.g
     cs = _samples(model.chainstay_stations(+1))
     ss = _samples(model.seatstay_stations(+1))
@@ -76,9 +76,6 @@ def run_checks(model):
         res[f"tyre_to_chainstay_{label}"] = round(tyre_gap(cs, axle), 1)
         res[f"tyre_to_seatstay_{label}"] = round(tyre_gap(ss, axle), 1)
         res[f"tyre_to_seat_tube_{label}"] = round(g.seat_tube_tyre_gap(csl), 1)
-        bp = g.brake_bridge()
-        res[f"tyre_to_brake_bridge_{label}"] = round(
-            float(np.linalg.norm(bp - axle)) - g.tyre_radius - 12.7 / 2, 1)
         res[f"belt_to_chainstay_{label}"] = round(belt_gaps(cs, axle), 1)
         res[f"belt_to_seatstay_{label}"] = round(belt_gaps(ss, axle), 1)
     # Front: down tube (wheel straight ahead) and space under the fork crown.
@@ -86,10 +83,19 @@ def run_checks(model):
         point_line_distance(g.front_axle, np.zeros(2), g.dt_front)
         - P.DOWN_TUBE[0] / 2 - g.tyre_radius, 1)
     res["front_crown_space_above_tyre"] = round(P.FORK_AXLE_TO_CROWN - g.tyre_radius, 1)
+    # Disc brake: rotor and caliper envelope ride on the slider; true solid distances.
+    frame = frame or model.build_frame()
+    for label, csl in (("min", P.CHAINSTAY_MIN), ("max", P.CHAINSTAY_MAX)):
+        res[f"disc_rotor_to_frame_{label}"] = round(frame.distance(model.rotor(csl)), 1)
+        res[f"disc_caliper_to_frame_{label}"] = round(frame.distance(model.caliper_envelope(csl)), 1)
+        res[f"tyre_solid_to_frame_{label}"] = round(frame.distance(model.tyre(csl)), 1)
     tyre_keys = [k for k in res if k.startswith("tyre") or k == "front_tyre_to_down_tube"]
+    tyre_keys = [k for k in tyre_keys if not isinstance(res[k], bool)]
     belt_keys = [k for k in res if k.startswith("belt")]
     res["tyre_ok"] = all(res[k] >= P.TYRE_CLEARANCE_MIN - 0.05 for k in tyre_keys)
     res["belt_ok"] = all(res[k] >= P.BELT_CLEARANCE_MIN - 0.05 for k in belt_keys)
+    res["disc_ok"] = all(v >= P.DISC_CLEARANCE_MIN - 0.05 for k, v in res.items()
+                         if k.startswith("disc_") and not isinstance(v, bool))
     return res
 
 

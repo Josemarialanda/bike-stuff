@@ -58,28 +58,33 @@ TUBES = [
      f"crimped to {P.CHAINSTAY_OVAL[0]:g} x {P.CHAINSTAY_OVAL[1]:g} oval for first 110 mm, then flared"),
     ("Seat stays", "3Al-2.5V CWSR", f"{P.SEATSTAY[0]} x {P.SEATSTAY[1]}",
      "bent: straight 85 mm at dropout (belt clearance), then to seat tube"),
-    ("Dropouts", "6Al-4V plate", f"{P.DROPOUT_THICKNESS:g} mm", "horizontal rear-facing track ends, 10.2 slot"),
-    ("Brake bridge", "3Al-2.5V", "12.7 x 1.0", "6 mm hole for recessed-nut caliper"),
+    ("Dropouts", "6Al-4V plate", f"{P.DROPOUT_THICKNESS:g} mm",
+     "receivers for sliding dropouts: window + 2 x M6 slots; sliders bought in"),
+    ("Hose guides", "Ti bosses", "M4", f"{P.HOSE_GUIDES_ON_SEATSTAY} on non-drive seat stay"),
     ("Belt splitter", "Ti / builder std.", "-", "bolted split in drive-side seat stay"),
 ]
 
 INTERFACES = [
     ("Wheels / tyres", f"700c (622). Clearance for {P.TYRE_WIDTH_DESIGN:g}-622 tyres with at least "
                        f"{P.TYRE_CLEARANCE_MIN:g} mm all round (checked in 3D). Stock Hektor: 25-622."),
-    ("Rear hub", f"{P.REAR_SPACING:g} mm OLD solid-axle hub (fixed/flip-flop or singlespeed freewheel), "
-                 "3/8\" or 10 mm axle, horizontal dropouts. Rear sprocket must sit at the chainline below."),
+    ("Rear hub", f"{P.REAR_SPACING:g} mm OLD disc hub (6-bolt), fixed/flip-flop or singlespeed freewheel, "
+                 "10 mm bolt-on or QR axle in sliding dropouts. Rear sprocket must sit at the chainline below."),
+    ("Sliding dropouts", "Bolt-on sliders (e.g. Paragon Machine Works-style) in 6Al-4V receiver plates; "
+                         f"{P.CHAINSTAY_MAX - P.CHAINSTAY_MIN:g} mm travel tensions the belt. Builder sets the "
+                         "receiver to the chosen slider system's drawing."),
     ("Drivetrain", f"Gates Carbon Drive CDX, {P.FRONT_TEETH}T front, {P.REAR_TEETH_FREEWHEEL}T (9-spline freewheel) "
                    f"or {P.REAR_TEETH_FIXED}T (track thread fixed), {P.BELT_TEETH}T belt, chainline {P.CHAINLINE} mm."),
     ("Frame split", "Required for belt: bolted splitter in drive-side seat stay (or split dropout)."),
     ("Bottom bracket", "BSA / English threaded 68 mm, external cups (stock: Hollow-Axle 170 mm cranks)."),
     ("Headset / fork", "ZS44/ZS56 tapered head tube; any 1 1/8\"-1.5\" tapered carbon fork, "
-                       f"{P.FORK_AXLE_TO_CROWN:g} mm A-C, {P.FORK_OFFSET:g} mm offset, clearance for "
-                       f"{P.TYRE_WIDTH_DESIGN:g} mm tyres."),
+                       f"{P.FORK_AXLE_TO_CROWN:g} mm A-C, {P.FORK_OFFSET:g} mm offset, {P.FRONT_AXLE}, "
+                       f"{P.FRONT_BRAKE_MOUNT}, clearance for {P.TYRE_WIDTH_DESIGN:g} mm tyres."),
     ("Seatpost / clamp", "27.2 mm post; 31.8 mm external seat collar."),
-    ("Brakes", "Rear rim-brake bridge (recessed-nut caliper, reach range in section 2). Most road calipers "
-               "do not clear 35 mm tyres: check the caliper's tyre clearance, or change to disc brakes "
-               "(needs sliding dropouts - see open items). Fixed-gear build can run without."),
-    ("Cable routing", "Rear brake internal through top tube: 6 mm ports 45 mm from each end, non-drive side."),
+    ("Brakes", f"Hydraulic disc. Rear: {P.REAR_BRAKE_MOUNT}, {P.ROTOR_REAR:g} mm rotor; caliper sits "
+               "behind/above the axle and moves with the slider, so belt tensioning never needs a brake "
+               f"re-adjustment. Front: {P.FRONT_BRAKE_MOUNT} on the fork."),
+    ("Hose routing", "Rear hose internal through top tube (6 mm ports 45 mm from each end, non-drive side), "
+                     f"then along the non-drive seat stay on {P.HOSE_GUIDES_ON_SEATSTAY} x M4 guide bosses."),
     ("Mounts", f"2 bottle bosses on down tube, {P.BOTTLE_BOSS_SPACING:g} mm spacing, "
                f"lower at {P.BOTTLE_BOSS_FROM_BB:g} mm from BB centre."),
 ]
@@ -87,8 +92,9 @@ INTERFACES = [
 BUILD_NOTES = [
     "TIG weld with full back-purge (argon); no discoloured welds.",
     "Post-weld: face & chase BB, face/ream head tube bores to ZS44/ZS56, ream seat tube to 27.2.",
-    "Rear dropouts must be parallel and coplanar (belt drive is intolerant of misalignment): "
-    "check rear triangle alignment to +/-0.5 mm and dropout faces parallel within 0.2 mm.",
+    "Rear receiver plates must be parallel and coplanar (belt drive and disc brake are both intolerant "
+    "of misalignment): check rear triangle alignment to +/-0.5 mm and plate faces parallel within 0.2 mm; "
+    "fit the actual sliders in the fixture when welding.",
     f"Belt line: rear cog and front ring must align within 0.5 mm at {P.CHAINLINE:g} mm chainline - "
     "confirm with the actual hub/crank before welding the chainstays.",
     "Finish: brushed or bead-blasted raw titanium (no paint). No branding of Schindelhauer.",
@@ -98,9 +104,10 @@ OPEN_ITEMS = [
     "Builder to confirm tube gauges/butting and the chainstay crimp (or substitute a machined yoke).",
     f"Confirm a {P.REAR_SPACING:g} mm hub, crank and Gates sprockets that give the {P.CHAINLINE:g} mm "
     "chainline; the chainstay/belt gaps are designed around it.",
-    "Brakes for 35 mm tyres: confirm a rim caliper that clears them, or switch to disc brakes with "
-    "sliding dropouts (keeps belt tensioning) and a disc fork.",
-    "Fork: needs 35 mm tyre clearance at the stated A-C/offset (many such forks are disc-only).",
+    "Choose the slider system (and whether its post mount suits a 160 mm rotor directly); the receiver "
+    "plates are drawn generically and follow that system's dimensions.",
+    f"Fork: tapered, {P.FORK_AXLE_TO_CROWN:g} A-C, {P.FORK_OFFSET:g} offset, {P.FRONT_AXLE}, "
+    f"{P.FRONT_BRAKE_MOUNT}, 35 mm tyre clearance.",
     "Pick the splitter style the builder prefers (seat-stay coupler vs. split dropout).",
     "Optional for a commuter: mudguard eyelets, rack mounts, dynamo routing - not included yet.",
 ]
@@ -158,11 +165,11 @@ def write_pdf(g, path, clearances, render_png=None, drawing_pngs=()):
     s.append(_table(rows, [38 * mm, 28 * mm, 34 * mm, 80 * mm]))
 
     sm = g.summary()
-    s.append(Paragraph("2. Rear axle position (horizontal track ends)", styles["Heading2"]))
-    rows = [("Chainstay", "Wheelbase", f"Seat-tube / tyre gap ({P.TYRE_WIDTH_DESIGN:g} mm)", "Rear brake reach")]
+    s.append(Paragraph("2. Rear axle position (sliding dropouts)", styles["Heading2"]))
+    rows = [("Chainstay", "Wheelbase", f"Seat-tube / tyre gap ({P.TYRE_WIDTH_DESIGN:g} mm)")]
     for r in sm["chainstay_positions"]:
-        rows.append((r["chainstay"], r["wheelbase"], r["seat_tube_tyre_gap"], r["rear_brake_reach"]))
-    s.append(_table(rows, [40 * mm, 40 * mm, 50 * mm, 50 * mm]))
+        rows.append((r["chainstay"], r["wheelbase"], r["seat_tube_tyre_gap"]))
+    s.append(_table(rows, [50 * mm, 50 * mm, 60 * mm]))
     s.append(Paragraph(
         f"Belt centre distance with a {P.BELT_TEETH}T belt: {sm['belt_cs_60_22']} mm (60/22 freewheel), "
         f"{sm['belt_cs_60_21']} mm (60/21 fixed). Both sit inside the slot.", styles["BodyText"]))
@@ -170,7 +177,8 @@ def write_pdf(g, path, clearances, render_png=None, drawing_pngs=()):
     s.append(Paragraph("Clearance checks (3D model, mm)", styles["Heading3"]))
     s.append(Paragraph(
         f"Design tyre {P.TYRE_WIDTH_DESIGN:g}-622 (torus, {P.TYRE_HEIGHT_DESIGN:g} mm tall). Targets: tyre "
-        f"{P.TYRE_CLEARANCE_MIN:g} mm, belt/sprockets {P.BELT_CLEARANCE_MIN:g} mm. 'min'/'max' = axle at "
+        f"{P.TYRE_CLEARANCE_MIN:g} mm, belt/sprockets {P.BELT_CLEARANCE_MIN:g} mm, disc rotor/caliper "
+        f"{P.DISC_CLEARANCE_MIN:g} mm. 'min'/'max' = axle at "
         "front/rear of the slot.", styles["BodyText"]))
     rows = [("Check", "Gap")] + [(k.replace("_", " "), v) for k, v in clearances.items()]
     s.append(_table(rows, [90 * mm, 40 * mm]))

@@ -55,7 +55,6 @@ TYRE_WIDTH_DESIGN = 35.0     # design clearance target: 35-622 (stock Hektor: 25
 TYRE_HEIGHT_DESIGN = 35.0
 TYRE_CLEARANCE_MIN = 4.0     # min gap from tyre to any tube, all round (mm)
 BELT_CLEARANCE_MIN = 3.0     # min gap from belt / sprockets to any tube (mm)
-RIM_BRAKE_TRACK_RADIUS = 308.0  # pad centre radius on a 622 rim
 
 # --- Drivetrain: Gates Carbon Drive CDX -----------------------------------------
 REAR_SPACING = 135.0         # 135 mm solid-axle hub (fixed/flip-flop or singlespeed)
@@ -81,8 +80,8 @@ HEAD_TUBE_OD = (48.0, 62.0)  # top / bottom OD, 6Al-4V machined, ZS44/ZS56
 HEAD_TUBE_ID = (44.0, 56.0)
 BB_SHELL = (41.0, 68.0)      # OD, width. BSA 1.37" x 24 TPI, 6Al-4V
 BB_SHELL_ID = 34.0
-DROPOUT_THICKNESS = 6.0      # 6Al-4V track-end plates
-AXLE_SLOT_WIDTH = 10.2       # 3/8" (9.5) / 10 mm axles
+DROPOUT_THICKNESS = 6.0      # 6Al-4V receiver plates for the sliding dropouts
+AXLE_SLOT_WIDTH = 10.2       # vertical slot in the slider: 10 mm bolt-on or QR axle
 
 # --- Layout details -------------------------------------------------------------
 TOP_TUBE_DROP_BELOW_HT_TOP = 5.0   # TT top surface below HT top
@@ -96,6 +95,25 @@ CHAINSTAY_TYRE_ZONE_Z = 31.5       # CS centre Z where tyre and belt ring overla
 STAY_DROPOUT_Z = REAR_SPACING / 2 + DROPOUT_THICKNESS / 2  # stay centre Z at dropout (mid-plate)
 BOTTLE_BOSS_SPACING = 64.0
 BOTTLE_BOSS_FROM_BB = 160.0        # lower boss, along DT axis from BB centre
-BRAKE_BRIDGE_TYRE_GAP = 4.0        # bridge tube to tyre at the shortest axle position
+HOSE_GUIDES_ON_SEATSTAY = 2        # M4 hose-guide bosses, non-drive seat stay
+
+# --- Sliding dropouts (belt tension) with post-mount disc brake ----------------
+# Frame-side 6Al-4V receiver plates; the slider carries the axle in a vertical
+# slot and (non-drive side) the post mount, so the caliper moves with the wheel.
+SLIDER_THICKNESS = 6.0             # flange outside the receiver; tongue sits in its window
+SLIDER_BOLT_TOP = (0.0, 21.0)      # slider bolt positions relative to the axle (x, y)
+SLIDER_BOLT_FRONT = (36.0, -15.0)
+SLIDER_BOLT_SLOT_WIDTH = 6.5       # M6 bolts
+
+# --- Brakes: hydraulic disc ----------------------------------------------------
+ROTOR_REAR = 160.0
+ROTOR_FRONT = 160.0
+ROTOR_INBOARD_OF_DROPOUT = 15.1    # 6-bolt rotor face to dropout face (IS standard; verify with hub)
+REAR_BRAKE_MOUNT = "post mount, 160 mm rotor (on the non-drive slider)"
+FRONT_BRAKE_MOUNT = "flat mount, 160 mm rotor"
+FRONT_AXLE = "12 x 100 mm thru-axle"
+CALIPER_ANGLE = 125.0              # caliper centre around rear axle, deg (0 = forward, 90 = up); 115-135 clears
+CALIPER_ENVELOPE = (85.0, 45.0, 15.0, 30.0)  # tangential, radial, inboard and outboard of rotor
+DISC_CLEARANCE_MIN = 3.0           # rotor / caliper envelope to any tube
 
 MATERIAL_NOTE = "Titanium 3Al-2.5V CWSR tubes; 6Al-4V head tube, BB shell, dropouts"

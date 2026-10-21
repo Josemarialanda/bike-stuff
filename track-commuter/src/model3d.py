@@ -111,29 +111,96 @@ class FrameModel:
         return outer, shell
 
     def dropout_plate(self, side):
+        """Frame-side receiver for a sliding dropout: top bridge + front leg, open to the
+        rear/bottom so the slider tongue (and the wheel) can sit in the window."""
         g = self.g
         y0 = g.bb_drop
-        xf = self.axle_min[0]          # slot front (shortest chainstay)
-        xr = self.axle_max[0] - 16     # plate rear end (slot opens rearwards)
+        xf = self.axle_min[0]          # axle at the front of its travel
+        xm = self.axle_max[0]          # axle at the rear of its travel
+        xr = xm - 26                   # rear end of the top bridge
         z0 = side * P.STAY_DROPOUT_Z - P.DROPOUT_THICKNESS / 2
+        t = P.DROPOUT_THICKNESS
         wp = cq.Workplane("XY", origin=(0, 0, z0))
-        body = (wp.moveTo(xr, y0 - 14).lineTo(xf + 48, y0 - 14)
-                .lineTo(xf + 48, y0 + 4).lineTo(xf + 26, y0 + 28)
-                .lineTo(xf + 4, y0 + 30).lineTo(xr, y0 + 14).close()
-                .extrude(P.DROPOUT_THICKNESS))
+        body = (wp.moveTo(xr, y0 + 12).lineTo(xf + 14, y0 + 12).lineTo(xf + 14, y0 - 28)
+                .lineTo(xf + 52, y0 - 24).lineTo(xf + 52, y0 + 6).lineTo(xf + 28, y0 + 36)
+                .lineTo(xf + 2, y0 + 38).lineTo(xr, y0 + 30).close().extrude(t))
+        r = P.SLIDER_BOLT_SLOT_WIDTH / 2
+        for bx, by in (P.SLIDER_BOLT_TOP, P.SLIDER_BOLT_FRONT):
+            slot = (cq.Workplane("XY", origin=(0, 0, z0 - 1))
+                    .center((xm + xf) / 2 + bx, y0 + by)
+                    .slot2D(xf - xm + 2 * r, 2 * r).extrude(t + 2))
+            body = body.cut(slot)
+        return body.val()
+
+    def slider(self, side, cs=None):
+        """Reference slider (bought-in part): flange outside the receiver, tongue in the
+        window flush with the hub face, vertical axle slot; post mount on non-drive side."""
+        g = self.g
+        ax, ay = self.g.rear_axle(cs)
+        half = P.REAR_SPACING / 2
+        t, ts = P.DROPOUT_THICKNESS, P.SLIDER_THICKNESS
+        z_in = side * half
+        def plate(z0, pts):
+            wp = cq.Workplane("XY", origin=(0, 0, min(z0, z0 + side * t)))
+            return wp.polyline([(ax + x, ay + y) for x, y in pts]).close().extrude(t).val()
+        tongue = plate(z_in, [(-13, -24), (13, -24), (13, 11), (-13, 11)])
+        flange_z = side * (half + t)
+        wp = cq.Workplane("XY", origin=(0, 0, min(flange_z, flange_z + side * ts)))
+        flange = wp.polyline([(ax + x, ay + y) for x, y in
+                              [(-16, -26), (44, -24), (44, -6), (12, 30), (-16, 30)]]).close().extrude(ts).val()
+        body = tongue.fuse(flange)
         r = P.AXLE_SLOT_WIDTH / 2
-        slot = (cq.Workplane("XY", origin=(0, 0, z0 - 1))
-                .moveTo(xr - 2, y0 - r).lineTo(xf, y0 - r)
-                .threePointArc((xf + r, y0), (xf, y0 + r))
-                .lineTo(xr - 2, y0 + r).close().extrude(P.DROPOUT_THICKNESS + 2))
-        return body.cut(slot).val()
+        cut = (cq.Workplane("XY", origin=(0, 0, -100)).moveTo(ax - r, ay - 40).lineTo(ax + r, ay - 40)
+               .lineTo(ax + r, ay).threePointArc((ax, ay + r), (ax - r, ay)).close().extrude(200).val())
+        body = body.cut(cut)
+        if side < 0:
+            body = body.fuse(self.post_mount_tab(cs))
+        return body
+
+    def _rotor_z(self):
+        return -(P.REAR_SPACING / 2 - P.ROTOR_INBOARD_OF_DROPOUT)
+
+    def rotor(self, cs=None, grow=0.0):
+        ax, ay = self.g.rear_axle(cs)
+        z = self._rotor_z()
+        return cylinder(V(ax, ay, z - 0.9 - grow), V(ax, ay, z + 0.9 + grow),
+                        P.ROTOR_REAR / 2 + grow)
+
+    def caliper_envelope(self, cs=None, grow=0.0):
+        """Box enclosing a typical post-mount caliper on the rotor edge (reference)."""
+        ax, ay = self.g.rear_axle(cs)
+        lt, lr, zin, zout = P.CALIPER_ENVELOPE
+        z = self._rotor_z()
+        rc = P.ROTOR_REAR / 2 - 5
+        box = cq.Solid.makeBox(lt + 2 * grow, lr + 2 * grow, zin + zout + 2 * grow,
+                               V(-(lt / 2 + grow), rc - lr / 2 - grow, z - zout - grow))
+        # Box built around +Y (angle 90); rotate to the caliper angle, move to the axle.
+        box = box.rotate(V(0, 0, 0), V(0, 0, 1), P.CALIPER_ANGLE - 90)
+        return box.translate(V(ax, ay, 0))
+
+    def post_mount_tab(self, cs=None):
+        """Slider-to-caliper post-mount bracket (reference, outboard of the rotor)."""
+        ax, ay = self.g.rear_axle(cs)
+        a = math.radians(P.CALIPER_ANGLE)
+        u = np.array([math.cos(a), math.sin(a)])
+        tvec = np.array([-u[1], u[0]])
+        c = np.array([ax, ay]) + u * (P.ROTOR_REAR / 2 - 22)
+        pts = [np.array([ax, ay]) + u * 12 - tvec * 14, np.array([ax, ay]) + u * 12 + tvec * 14,
+               c + tvec * 45, c - tvec * 45]
+        z0 = -(P.REAR_SPACING / 2 + P.DROPOUT_THICKNESS + P.SLIDER_THICKNESS) - 8
+        wp = cq.Workplane("XY", origin=(0, 0, z0))
+        tab = wp.polyline([tuple(p) for p in pts]).close().extrude(8).val()
+        for k in (-37, 37):     # 74 mm post-mount hole spacing
+            h = c + tvec * k
+            tab = tab.cut(cylinder(V(h[0], h[1], z0 - 1), V(h[0], h[1], z0 + 9), 3.0))
+        return tab
 
     # -- branches ----------------------------------------------------------------
     def top_tube(self):
         g = self.g
         od, wall = P.TOP_TUBE
         shell = tube(v3(g.tt_rear), v3(g.tt_front), od, wall)
-        # Internal rear-brake routing ports (6 mm) on the top, non-drive side.
+        # Internal rear brake hose ports (6 mm) on the top, non-drive side.
         for x in (g.tt_front[0] - 45, g.tt_rear[0] + 45):
             c = V(x, g.tt_y, 0)
             d = V(0, math.cos(math.radians(35)), -math.sin(math.radians(35)))
@@ -157,7 +224,7 @@ class FrameModel:
     def chainstay_stations(self, side):
         """[(point, tangent, width, height)] along the chainstay, BB to dropout."""
         g = self.g
-        xe = self.axle_min[0] + 34                       # end inside the dropout
+        xe = self.axle_min[0] + 48                       # butts onto the receiver's front edge
         ye = g.bb_drop * xe / self.axle_nom[0]
         zt = P.CHAINSTAY_TYRE_ZONE_Z
         stations_x = [-6, -45, -75, -110, -170, -240, -300, self.axle_min[0] + 60, xe]
@@ -188,7 +255,7 @@ class FrameModel:
 
     def seatstay_points(self, side):
         g = self.g
-        p0 = np.array([self.axle_min[0] + 6, g.bb_drop + 22])
+        p0 = np.array([self.axle_min[0] + 12, g.bb_drop + 40])   # on the receiver's top edge
         p2 = g.ss_top
         d = (p2 - p0) / np.linalg.norm(p2 - p0)
         L = float(np.linalg.norm(p2 - p0))
@@ -218,22 +285,16 @@ class FrameModel:
         c = a + (b - a) * 0.5
         return cylinder(c - d * 16, c + d * 16, 12.0).cut(cylinder(c - d * 17, c + d * 17, 7.0))
 
-    def brake_bridge(self):
-        g = self.g
-        bp = g.brake_bridge()
-        # Z of the seat stays at the bridge position (interpolate along the stay).
-        pts = self.seatstay_points(+1)
-        xs = [p.x for p in pts]
-        zb = float(np.interp(bp[0], xs, [p.z for p in pts]))
-        a, b = v3(bp, -zb), v3(bp, zb)
-        bridge = cylinder(a, b, 6.35).cut(cylinder(a, b, 6.35 - 1.0))
-        # Caliper bolt hole: perpendicular to the stays, through the bridge.
-        ss_dir = _np(pts[-1] - pts[0])[:2]
-        ss_dir = ss_dir / np.linalg.norm(ss_dir)
-        n = V(ss_dir[1], -ss_dir[0], 0)   # points rearwards/up, away from tyre
-        c = v3(bp, 0)
-        hole = cylinder(c - n * 10, c + n * 10, 3.0)
-        return bridge.cut(hole)
+    def hose_guides(self):
+        """M4 hose-guide bosses on the outside of the non-drive seat stay."""
+        pts = self.seatstay_points(-1)
+        out = None
+        for i in range(P.HOSE_GUIDES_ON_SEATSTAY):
+            p = pts[3] + (pts[5] - pts[3]) * (i / max(1, P.HOSE_GUIDES_ON_SEATSTAY - 1))
+            boss = cylinder(p, p + V(0, 0, -(P.SEATSTAY[0] / 2 + 3)), 3.5).cut(
+                cylinder(p, p + V(0, 0, -(P.SEATSTAY[0] / 2 + 4)), 1.7))
+            out = boss if out is None else out.fuse(boss)
+        return out
 
     # -- assembly ------------------------------------------------------------------
     def build_frame(self):
@@ -250,7 +311,7 @@ class FrameModel:
             cs = self.chainstay(s).cut(bb_out)
             ss = self.seatstay(s).cut(st_out)
             stays += [cs, ss]
-        parts = [ht, bb, st, tt, dt, *stays, *drops, self.brake_bridge(), self.belt_splitter()]
+        parts = [ht, bb, st, tt, dt, *stays, *drops, self.hose_guides(), self.belt_splitter()]
         frame = parts[0]
         for p in parts[1:]:
             frame = frame.fuse(p)
@@ -277,6 +338,12 @@ class FrameModel:
         for p in parts[1:]:
             f = f.fuse(p)
         return f
+
+    def tyre(self, cs=None):
+        """Design tyre as a torus around the rear axle (for clearance checks)."""
+        r = P.TYRE_WIDTH_DESIGN / 2
+        rc = P.RIM_BSD / 2 + P.TYRE_HEIGHT_DESIGN - r
+        return cq.Solid.makeTorus(rc, r, v3(self.g.rear_axle(cs)), V(0, 0, 1))
 
     def wheel(self, centre):
         r_rim = P.RIM_BSD / 2
@@ -307,4 +374,9 @@ class FrameModel:
         asm.add(self.wheel(v3(self.axle_nom)), name="rear_wheel_ref",
                 color=cq.Color(0.15, 0.15, 0.15))
         asm.add(self.belt_drive(), name="belt_sprockets_ref", color=cq.Color(0.3, 0.3, 0.3))
+        for side, name in ((+1, "slider_drive_ref"), (-1, "slider_nondrive_pm_ref")):
+            asm.add(self.slider(side, P.CHAINSTAY_NOMINAL), name=name, color=cq.Color(0.45, 0.45, 0.5))
+        asm.add(self.rotor(P.CHAINSTAY_NOMINAL), name="rear_rotor_160_ref", color=cq.Color(0.6, 0.6, 0.6))
+        asm.add(self.caliper_envelope(P.CHAINSTAY_NOMINAL), name="rear_caliper_envelope_ref",
+                color=cq.Color(0.2, 0.2, 0.25))
         return asm

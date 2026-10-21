@@ -12,7 +12,7 @@ builder still does their own production engineering.
 | File | Format | What it is |
 |---|---|---|
 | `cad/ti_track_commuter_53_frame.step` | STEP AP214 | 3D frame solid, mm. **Main file.** |
-| `cad/ti_track_commuter_53_assembly_reference.step` | STEP | Frame + reference fork, 35 mm-tyre wheels and belt sprockets |
+| `cad/ti_track_commuter_53_assembly_reference.step` | STEP | Frame + reference fork, 35 mm-tyre wheels, belt sprockets, sliders, rotor, caliper envelope |
 | `cad/ti_track_commuter_53_frame.stl` | STL | Mesh, for quick viewing or 3D printing a model |
 | `drawings/*_sheet1_side_elevation.{dxf,pdf,svg}` | DXF 1:1 / PDF A3 1:5 | Side elevation: all geometry dimensions |
 | `drawings/*_sheet2_rear_end.{dxf,pdf,svg}` | DXF 1:1 / PDF A3 1:2 | Rear plan view (spacing, chainline, tyre/belt clearance) + dropout detail |
@@ -31,11 +31,12 @@ mm; don't scale off the PDFs.
 | Head angle / Seat angle | 73.5° / 75° | 73.5° / 75° |
 | Head tube | 120 | 105 (ZS44/ZS56 tapered) |
 | Seat tube c-t | 530 | 530 |
-| Chainstay | 378 | 395–409 slot (401.5 with 60/22 + 115T belt) |
+| Chainstay | 378 | 395–409 via sliding dropouts (401.5 with 60/22 + 115T belt) |
 | Wheelbase | 961 | 978–992 (984.7 nominal) |
 | BB drop / height | not published | 48.3 / 297.7 (35 mm tyre) |
-| Rear hub / chainline | 120 track / ~42 | 135 solid axle / 50 |
-| Fork | tapered carbon, 25 mm tyres | tapered, 380 A-C, 45 offset, 35 mm clearance |
+| Rear hub / chainline | 120 track / ~42 | 135 disc hub (10 mm bolt-on or QR) / 50 |
+| Brakes | rim calipers (freewheel version) | hydraulic disc: rear post mount on slider, front flat mount, 160 mm rotors |
+| Fork | tapered carbon, rim brake | tapered disc fork, 380 A-C, 45 offset, 12x100 thru-axle, 35 mm clearance |
 | Trail | not published | 55.6 (35 mm tyre) |
 | Frame mass (est.) | 6061 Al | ~1.64 kg Ti, bare |
 
@@ -60,10 +61,15 @@ mm; don't scale off the PDFs.
      15 mm keeps stack, reach, head angle and BB drop the same as Hektor. Trail rises 3 mm because
      of the bigger tyre.
    - *Seat stays* stay wide past the tyre and converge late.
-   - *Brake bridge* sits 4 mm above the tyre, so the caliper reach is 48–57 mm over the slot.
-4. **Brakes.** Most road rim calipers don't clear 35 mm tyres, so check the caliper or switch to
-   disc brakes. Disc brakes with horizontal dropouts need sliding dropouts, a different rear end.
-   This is listed as an open item.
+4. **Disc brakes with sliding dropouts.** Rim calipers don't clear 35 mm tyres, so the frame uses
+   hydraulic discs. The belt is tensioned by bolt-on sliders (Paragon Machine Works-style) that sit
+   in titanium receiver plates. The non-drive slider carries the rear post mount, so the caliper
+   moves with the wheel and belt tensioning never upsets the brake. The 160 mm rotor and caliper
+   envelope clear the frame by ≥ 4.9 mm over the full 14 mm travel (checked against the solid
+   model). The caliper sits behind and above the axle, at 125°; anywhere from 115° to 135° clears.
+   The rear hose runs inside the top tube, then along the non-drive seat stay on two M4 guide
+   bosses. The rim-brake bridge is gone. The receiver plates are drawn generically: the builder
+   matches them to the slider system chosen.
 5. **Titanium construction.** Round 3Al-2.5V tubes replace the hydroformed aluminium. The machined
    head tube, BB shell and dropouts are 6Al-4V.
 6. **Belt drive needs a frame split.** Hektor uses a patented "Belt Port" in the dropout. This
@@ -74,7 +80,7 @@ mm; don't scale off the PDFs.
 8. **No Schindelhauer branding or patented details** are reproduced.
 
 Open items to agree with the builder are listed at the end of the spec sheet (tube butting,
-splitter style, hub/crank/sprockets for the 50 mm chainline, brakes, fork, commuter mounts).
+splitter style, slider system, hub/crank/sprockets for the 50 mm chainline, fork, commuter mounts).
 
 ## Changing the design
 
@@ -95,7 +101,7 @@ just those).
 |---|---|
 | `src/params.py` | All inputs (published geometry, design choices, tube set) |
 | `src/geometry.py` | Solves key points, BB drop, trail, wheelbase, belt length, brake reach |
-| `src/checks.py` | 3D clearance checks: tyre and belt/sprockets vs. every tube |
+| `src/checks.py` | 3D clearance checks: tyre, belt/sprockets, rotor and caliper vs. the frame |
 | `src/model3d.py` | CadQuery/OpenCascade solid model with coped tube joints |
 | `src/drawings.py` | DXF/PDF/SVG drawings from hidden-line projections of the model |
 | `src/spec.py` | Spec sheet PDF + CSV/JSON |

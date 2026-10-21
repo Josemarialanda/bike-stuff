@@ -30,13 +30,14 @@ def main():
     model = FrameModel()
     g = model.g
     print(json.dumps(g.summary(), indent=2))
-    clearances = run_checks(model)
-    print(json.dumps(clearances, indent=2))
-    assert clearances["tyre_ok"] and clearances["belt_ok"], "clearance check failed"
 
     print("building 3D frame ...")
     frame = model.build_frame()
     assert frame.isValid(), "frame solid is invalid"
+    clearances = run_checks(model, frame)
+    print(json.dumps(clearances, indent=2))
+    assert clearances["tyre_ok"] and clearances["belt_ok"] and clearances["disc_ok"], \
+        "clearance check failed"
     tag = "ti_track_commuter_53"
     cq.exporters.export(frame, out("cad", f"{tag}_frame.step"))
     cq.exporters.export(frame, out("cad", f"{tag}_frame.stl"), tolerance=0.1, angularTolerance=0.2)
@@ -46,7 +47,11 @@ def main():
 
     print("rendering previews ...")
     asm = [(frame, TI), (model.fork(), DARK), (model.wheel(v3(model.axle_nom)), DARK),
-           (model.wheel(v3(g.front_axle)), DARK), (model.belt_drive(), (0.35, 0.35, 0.35))]
+           (model.wheel(v3(g.front_axle)), DARK), (model.belt_drive(), (0.35, 0.35, 0.35)),
+           (model.slider(+1, P.CHAINSTAY_NOMINAL), (0.45, 0.45, 0.5)),
+           (model.slider(-1, P.CHAINSTAY_NOMINAL), (0.45, 0.45, 0.5)),
+           (model.rotor(P.CHAINSTAY_NOMINAL), (0.6, 0.6, 0.6)),
+           (model.caliper_envelope(P.CHAINSTAY_NOMINAL), (0.25, 0.25, 0.3))]
     render([(frame, TI)], out("renders", "frame_three_quarter.png"), "three_quarter")
     render([(frame, TI)], out("renders", "frame_side.png"), "side_drive")
     render([(frame, TI)], out("renders", "frame_rear.png"), "rear")
