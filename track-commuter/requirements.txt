@@ -1,0 +1,5 @@
+cadquery>=2.4
+ezdxf>=1.3
+matplotlib>=3.7
+numpy
+reportlab>=4.0

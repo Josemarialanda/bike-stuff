@@ -1,0 +1,285 @@
+{
+  "size": "53 S",
+  "units": "mm / degrees",
+  "geometry": [
+    {
+      "parameter": "Stack",
+      "hektor_published": 498,
+      "design": 498.0,
+      "note": "kept"
+    },
+    {
+      "parameter": "Reach",
+      "hektor_published": 406,
+      "design": 406.0,
+      "note": "kept"
+    },
+    {
+      "parameter": "Head tube length",
+      "hektor_published": 120,
+      "design": 120.0,
+      "note": "kept; ZS44/ZS56 zero-stack cups"
+    },
+    {
+      "parameter": "Head tube angle",
+      "hektor_published": 73.5,
+      "design": 73.5,
+      "note": "kept"
+    },
+    {
+      "parameter": "Seat tube angle",
+      "hektor_published": 75.0,
+      "design": 75.0,
+      "note": "kept"
+    },
+    {
+      "parameter": "Seat tube c-t",
+      "hektor_published": 530,
+      "design": 530.0,
+      "note": "BB centre to top of seat tube"
+    },
+    {
+      "parameter": "Top tube (horizontal)",
+      "hektor_published": 530,
+      "design": 539.4,
+      "note": "follows from stack/reach/STA; published value is ~9 mm short in every size"
+    },
+    {
+      "parameter": "Chainstay",
+      "hektor_published": 378,
+      "design": "384-400 (nom. 390)",
+      "note": "horizontal slot; 378 only possible with Hektor's shaped aero seat tube"
+    },
+    {
+      "parameter": "Wheelbase",
+      "hektor_published": 961,
+      "design": "967-983 (nom. 973)",
+      "note": "961 at CS 378 -> geometry matches Hektor exactly"
+    },
+    {
+      "parameter": "Standover",
+      "hektor_published": 793,
+      "design": 781,
+      "note": "estimate, 25 mm tyre, at BB"
+    },
+    {
+      "parameter": "BB drop",
+      "hektor_published": "n/p",
+      "design": 48.4,
+      "note": "derived (not published); confirmed from product photo"
+    },
+    {
+      "parameter": "BB height",
+      "hektor_published": "n/p",
+      "design": 287.6,
+      "note": "25 mm tyre"
+    },
+    {
+      "parameter": "Fork axle-to-crown",
+      "hektor_published": "n/p",
+      "design": 365.0,
+      "note": "design value; incl. lower headset"
+    },
+    {
+      "parameter": "Fork offset",
+      "hektor_published": "n/p",
+      "design": 45.0,
+      "note": "design value"
+    },
+    {
+      "parameter": "Trail",
+      "hektor_published": "n/p",
+      "design": 52.6,
+      "note": "25 mm tyre"
+    },
+    {
+      "parameter": "Front centre",
+      "hektor_published": "n/p",
+      "design": 588.1,
+      "note": "toe overlap ~18 mm w/ 170 cranks"
+    },
+    {
+      "parameter": "Headset",
+      "hektor_published": "1 1/8\"",
+      "design": "ZS44 / ZS56 tapered",
+      "note": "Hektor uses integrated tapered 1 1/8-1.5"
+    },
+    {
+      "parameter": "Seatpost",
+      "hektor_published": 27.2,
+      "design": 27.2,
+      "note": "reamed Ti sleeve in 31.8 seat tube"
+    }
+  ],
+  "derived": {
+    "bb_drop": 48.4,
+    "bb_height_25c": 287.6,
+    "trail_25c": 52.6,
+    "front_center": 588.1,
+    "wheelbase_at_published_cs": 961.0,
+    "effective_top_tube_at_stack": 539.4,
+    "top_tube_axis_height": 477.1,
+    "seat_tube_above_tt": 36.1,
+    "standover_est": 780.6,
+    "toe_overlap_est": 17.9,
+    "belt_cs_60_22": 390.3,
+    "belt_cs_60_21": 392.8,
+    "min_cs_for_tyre": 383.5,
+    "chainstay_positions": [
+      {
+        "chainstay": 384.0,
+        "wheelbase": 967.0,
+        "seat_tube_tyre_gap": 3.5,
+        "rear_brake_reach": 46.9
+      },
+      {
+        "chainstay": 390.0,
+        "wheelbase": 973.1,
+        "seat_tube_tyre_gap": 9.4,
+        "rear_brake_reach": 50.5
+      },
+      {
+        "chainstay": 400.0,
+        "wheelbase": 983.2,
+        "seat_tube_tyre_gap": 19.1,
+        "rear_brake_reach": 56.7
+      }
+    ]
+  },
+  "tubes": [
+    {
+      "tube": "Top tube",
+      "material": "3Al-2.5V CWSR",
+      "size": "31.8 x 0.9",
+      "note": "straight gauge; builder may butt 0.9/0.6/0.9"
+    },
+    {
+      "tube": "Down tube",
+      "material": "3Al-2.5V CWSR",
+      "size": "44.5 x 0.9",
+      "note": "oversize for BB/belt stiffness"
+    },
+    {
+      "tube": "Seat tube",
+      "material": "3Al-2.5V CWSR",
+      "size": "31.8 x 0.9",
+      "note": "120 mm internal sleeve reamed to 27.2; rear clamp slot + relief hole"
+    },
+    {
+      "tube": "Head tube",
+      "material": "6Al-4V machined",
+      "size": "OD 48/62 tapered",
+      "note": "ZS44 top / ZS56 bottom bearing bores (SHIS)"
+    },
+    {
+      "tube": "BB shell",
+      "material": "6Al-4V",
+      "size": "OD 41 x 68 wide",
+      "note": "BSA 1.37\" x 24 TPI, face & chase"
+    },
+    {
+      "tube": "Chainstays",
+      "material": "3Al-2.5V CWSR",
+      "size": "22.2 x 0.9",
+      "note": "crimped to 16 x 27 oval for first 110 mm, then flared"
+    },
+    {
+      "tube": "Seat stays",
+      "material": "3Al-2.5V CWSR",
+      "size": "16.0 x 0.9",
+      "note": "bent: straight 85 mm at dropout (belt clearance), then to seat tube"
+    },
+    {
+      "tube": "Dropouts",
+      "material": "6Al-4V plate",
+      "size": "6 mm",
+      "note": "horizontal rear-facing track ends, 10.2 slot"
+    },
+    {
+      "tube": "Brake bridge",
+      "material": "3Al-2.5V",
+      "size": "12.7 x 1.0",
+      "note": "6 mm hole for recessed-nut caliper"
+    },
+    {
+      "tube": "Belt splitter",
+      "material": "Ti / builder std.",
+      "size": "-",
+      "note": "bolted split in drive-side seat stay"
+    }
+  ],
+  "interfaces": {
+    "Wheels / tyres": "700c (622). Designed and checked for 25 mm (stock Ultrasport III 25-622).",
+    "Rear hub": "120 mm OLD track hub, 3/8\" or 10 mm solid axle, horizontal dropouts.",
+    "Drivetrain": "Gates Carbon Drive CDX, 60T front, 22T (9-spline freewheel) or 21T (track thread fixed), 113T belt, chainline 42.5 mm.",
+    "Frame split": "Required for belt: bolted splitter in drive-side seat stay (or split dropout).",
+    "Bottom bracket": "BSA / English threaded 68 mm, external cups (stock: Hollow-Axle 170 mm cranks).",
+    "Headset / fork": "ZS44/ZS56 tapered head tube; any 1 1/8\"-1.5\" tapered carbon fork, 365 mm A-C, 45 mm offset, drilled for a rim brake.",
+    "Seatpost / clamp": "27.2 mm post; 31.8 mm external seat collar.",
+    "Brakes": "Rear rim-brake bridge for long-reach (47-57 mm) caliper; front through fork crown. Fixed-gear build can omit both (bridge is harmless).",
+    "Cable routing": "Rear brake internal through top tube: 6 mm ports 45 mm from each end, non-drive side.",
+    "Mounts": "2 bottle bosses on down tube, 64 mm spacing, lower at 160 mm from BB centre."
+  },
+  "published_all_sizes": [
+    {
+      "Size": "53 S",
+      "Seat tube c-t (A)": 530,
+      "Top tube horiz. (B)": 530,
+      "Head tube (C)": 120,
+      "Chainstay (D)": 378,
+      "Head angle (E)": 73.5,
+      "Seat angle (F)": 75.0,
+      "Wheelbase (G)": 961,
+      "Standover (H)": 793,
+      "Reach (I)": 406,
+      "Stack (J)": 498,
+      "Headset": "1 1/8\"",
+      "Seatpost": 27.2
+    },
+    {
+      "Size": "56 M",
+      "Seat tube c-t (A)": 560,
+      "Top tube horiz. (B)": 550,
+      "Head tube (C)": 140,
+      "Chainstay (D)": 378,
+      "Head angle (E)": 73.0,
+      "Seat angle (F)": 74.5,
+      "Wheelbase (G)": 982,
+      "Standover (H)": 816,
+      "Reach (I)": 416,
+      "Stack (J)": 516,
+      "Headset": "1 1/8\"",
+      "Seatpost": 27.2
+    },
+    {
+      "Size": "59 L",
+      "Seat tube c-t (A)": 590,
+      "Top tube horiz. (B)": 570,
+      "Head tube (C)": 160,
+      "Chainstay (D)": 378,
+      "Head angle (E)": 74.0,
+      "Seat angle (F)": 74.0,
+      "Wheelbase (G)": 988,
+      "Standover (H)": 841,
+      "Reach (I)": 426,
+      "Stack (J)": 537,
+      "Headset": "1 1/8\"",
+      "Seatpost": 27.2
+    },
+    {
+      "Size": "62 XL",
+      "Seat tube c-t (A)": 620,
+      "Top tube horiz. (B)": 590,
+      "Head tube (C)": 180,
+      "Chainstay (D)": 378,
+      "Head angle (E)": 74.0,
+      "Seat angle (F)": 74.0,
+      "Wheelbase (G)": 1008,
+      "Standover (H)": 865,
+      "Reach (I)": 440,
+      "Stack (J)": 557,
+      "Headset": "1 1/8\"",
+      "Seatpost": 27.2
+    }
+  ]
+}
