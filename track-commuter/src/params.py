@@ -27,7 +27,7 @@ SIZE = "53 S"
 # --- Fit-critical geometry (kept exactly as published for size 53) -----------
 STACK = 498.0            # BB centre to top-centre of head tube, vertical
 REACH = 406.0            # BB centre to top-centre of head tube, horizontal
-HEAD_TUBE_LEN = 120.0
+HEAD_TUBE_LEN = 105.0    # published 120; -15 for the taller 35 mm-clearance fork (keeps stack/reach/BB drop)
 HEAD_ANGLE = 73.5        # deg from horizontal
 SEAT_ANGLE = 75.0        # deg from horizontal
 SEAT_TUBE_CT = 530.0     # BB centre to top of seat tube, along the axis
@@ -35,32 +35,34 @@ CHAINSTAY_PUBLISHED = 378.0
 
 # --- Chosen fork (not published) -------------------------------------------------
 # With stack/reach/head angle fixed, the fork sets the front axle height and so
-# the BB drop (geometry.py derives it: ~48 mm). 365/45 reproduces the published
-# 961 mm wheelbase and matches a pixel measurement of the side-on product photo.
-FORK_AXLE_TO_CROWN = 365.0   # incl. lower headset stack (zero-stack ZS56 ~0 mm)
+# the BB drop (geometry.py derives it). Hektor (25 mm tyres): 365 A-C with the
+# 120 head tube gives 48.4 drop and the published 961 wheelbase. For 35 mm tyres
+# the fork grows to 380 A-C and the head tube shrinks 15 mm, so the drop is unchanged.
+FORK_AXLE_TO_CROWN = 380.0   # incl. lower headset stack (zero-stack ZS56 ~0 mm)
 FORK_OFFSET = 45.0
 
 # Rear axle travel in the horizontal track-end slot (chainstay length).
-# 384 is the shortest position that clears a 25 mm tyre with a round 31.8 mm
-# seat tube (Hektor's aero seat tube allows 378). 390 is where the stock
-# 60T/22T + 113T Gates belt lands.
-CHAINSTAY_MIN = 384.0
-CHAINSTAY_NOMINAL = 390.0
-CHAINSTAY_MAX = 400.0
+# CHAINSTAY_MIN is the shortest position where a 35 mm tyre clears the round
+# 31.8 mm seat tube by TYRE_CLEARANCE_MIN (Hektor: 378 with 25 mm tyres).
+# NOMINAL is where 60T/22T + 115T Gates belt lands.
+CHAINSTAY_MIN = 395.0
+CHAINSTAY_NOMINAL = 401.5
+CHAINSTAY_MAX = 409.0
 
 # --- Wheels / tyres -----------------------------------------------------------
 RIM_BSD = 622.0
-TYRE_WIDTH_DESIGN = 25.0     # stock Continental Ultrasport III 25-622
-TYRE_HEIGHT_DESIGN = 25.0
-TYRE_CLEARANCE_MIN = 3.0     # min gap to any tube (mm)
+TYRE_WIDTH_DESIGN = 35.0     # design clearance target: 35-622 (stock Hektor: 25-622)
+TYRE_HEIGHT_DESIGN = 35.0
+TYRE_CLEARANCE_MIN = 4.0     # min gap from tyre to any tube, all round (mm)
+BELT_CLEARANCE_MIN = 3.0     # min gap from belt / sprockets to any tube (mm)
 RIM_BRAKE_TRACK_RADIUS = 308.0  # pad centre radius on a 622 rim
 
 # --- Drivetrain: Gates Carbon Drive CDX -----------------------------------------
-REAR_SPACING = 120.0         # track / flip-flop hub OLD
-CHAINLINE = 42.5             # standard track chainline
+REAR_SPACING = 135.0         # 135 mm solid-axle hub (fixed/flip-flop or singlespeed)
+CHAINLINE = 50.0             # 42.5 track chainline leaves no room between 35 mm tyre and 60T ring
 BELT_PITCH = 11.0
 BELT_WIDTH = 12.0
-BELT_TEETH = 113
+BELT_TEETH = 115             # 113T (stock) is too short for the longer chainstay
 FRONT_TEETH = 60
 REAR_TEETH_FREEWHEEL = 22
 REAR_TEETH_FIXED = 21
@@ -84,14 +86,16 @@ AXLE_SLOT_WIDTH = 10.2       # 3/8" (9.5) / 10 mm axles
 
 # --- Layout details -------------------------------------------------------------
 TOP_TUBE_DROP_BELOW_HT_TOP = 5.0   # TT top surface below HT top
-DOWN_TUBE_HT_JUNCTION = 38.0       # DT axis meets HT axis this far above HT bottom
+DOWN_TUBE_HT_JUNCTION = 34.0       # DT axis meets HT axis this far above HT bottom
 SEATSTAY_BELOW_TT = 65.0           # SS meet ST this far below TT axis (along ST)
 SEATSTAY_ST_OFFSET = 11.0          # SS centre Z offset at the seat-tube junction
 SEATSTAY_BEND_FROM_DROPOUT = 85.0  # SS run straight (belt clearance) before bending in
-CHAINSTAY_BB_Z = 22.0              # CS centre Z at BB shell
-STAY_DROPOUT_Z = 63.0              # stay centre Z at dropout (mid-plate)
+SEATSTAY_CONVERGE_POWER = 1.6      # >1 keeps the stays wide past the tyre, converging late
+CHAINSTAY_BB_Z = 25.0              # CS centre Z at BB shell
+CHAINSTAY_TYRE_ZONE_Z = 31.5       # CS centre Z where tyre and belt ring overlap (oval section)
+STAY_DROPOUT_Z = REAR_SPACING / 2 + DROPOUT_THICKNESS / 2  # stay centre Z at dropout (mid-plate)
 BOTTLE_BOSS_SPACING = 64.0
 BOTTLE_BOSS_FROM_BB = 160.0        # lower boss, along DT axis from BB centre
-BRAKE_REACH_TARGET = 50.5          # at nominal axle; long-reach 47-57 caliper
+BRAKE_BRIDGE_TYRE_GAP = 4.0        # bridge tube to tyre at the shortest axle position
 
 MATERIAL_NOTE = "Titanium 3Al-2.5V CWSR tubes; 6Al-4V head tube, BB shell, dropouts"

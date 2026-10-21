@@ -154,20 +154,23 @@ class FrameModel:
             shell = shell.fuse(boss.cut(cylinder(c, c + n * (od / 2 + 3), 2.5)))
         return shell
 
-    def chainstay(self, side):
+    def chainstay_stations(self, side):
+        """[(point, tangent, width, height)] along the chainstay, BB to dropout."""
         g = self.g
         xe = self.axle_min[0] + 34                       # end inside the dropout
         ye = g.bb_drop * xe / self.axle_nom[0]
-        def y_at(x):
-            return ye * x / xe
-        stations_x = [-6, -40, -75, -110, -170, -240, -300, xe]
+        zt = P.CHAINSTAY_TYRE_ZONE_Z
+        stations_x = [-6, -45, -75, -110, -170, -240, -300, self.axle_min[0] + 60, xe]
+
+        x_full = self.axle_min[0] + 60   # fully out past the rear belt cog
+
         def z_at(x):
             if x >= -110:
-                return np.interp(-x, [6, 75, 110], [P.CHAINSTAY_BB_Z, 24.3, 24.5])
-            f = (x - (-110)) / (xe - (-110))
-            return 24.5 + (P.STAY_DROPOUT_Z - 24.5) * (3 * f**2 - 2 * f**3 if f < 1 else 1)
-        pts = [V(x, y_at(x), side * z_at(x)) for x in stations_x]
-        tans = _tangents(pts)
+                return np.interp(-x, [6, 45, 110], [P.CHAINSTAY_BB_Z, zt, zt])
+            f = min(1.0, (x + 110) / (x_full + 110))
+            return zt + (P.STAY_DROPOUT_Z - zt) * (3 * f**2 - 2 * f**3)
+
+        pts = [V(x, ye * x / xe, side * z_at(x)) for x in stations_x]
         od = P.CHAINSTAY[0]
         ow, oh = P.CHAINSTAY_OVAL
         sizes = []
@@ -178,8 +181,10 @@ class FrameModel:
                 sizes.append(((ow + od) / 2, (oh + od) / 2))
             else:
                 sizes.append((od, od))
-        st = [(p, t, w, h) for p, t, (w, h) in zip(pts, tans, sizes)]
-        return lofted_tube(st, P.CHAINSTAY[1])
+        return [(p, t, w, h) for p, t, (w, h) in zip(pts, _tangents(pts), sizes)]
+
+    def chainstay(self, side):
+        return lofted_tube(self.chainstay_stations(side), P.CHAINSTAY[1])
 
     def seatstay_points(self, side):
         g = self.g
@@ -187,23 +192,23 @@ class FrameModel:
         p2 = g.ss_top
         d = (p2 - p0) / np.linalg.norm(p2 - p0)
         L = float(np.linalg.norm(p2 - p0))
-        s_vals = [0, 40, P.SEATSTAY_BEND_FROM_DROPOUT, 160, 240, 320, L - 30, L]
+        bend = P.SEATSTAY_BEND_FROM_DROPOUT
+        s_vals = [0, 40, bend, *np.linspace(bend + 60, L, 6)]
         zs = []
         for s in s_vals:
-            if s <= P.SEATSTAY_BEND_FROM_DROPOUT:
-                z = P.STAY_DROPOUT_Z
-            else:
-                f = (s - P.SEATSTAY_BEND_FROM_DROPOUT) / (L - P.SEATSTAY_BEND_FROM_DROPOUT)
-                f = math.sin(f * math.pi / 2)  # leave the bend gently, arrive straight-ish
-                z = P.STAY_DROPOUT_Z + (P.SEATSTAY_ST_OFFSET - P.STAY_DROPOUT_Z) * f
-            zs.append(z)
+            f = max(0.0, (s - bend) / (L - bend))
+            # Power > 1: stays stay wide past the tyre and converge late.
+            zs.append(P.STAY_DROPOUT_Z + (P.SEATSTAY_ST_OFFSET - P.STAY_DROPOUT_Z)
+                      * f ** P.SEATSTAY_CONVERGE_POWER)
         return [V(*(p0 + d * s), side * z) for s, z in zip(s_vals, zs)]
 
-    def seatstay(self, side):
+    def seatstay_stations(self, side):
         pts = self.seatstay_points(side)
-        tans = _tangents(pts)
-        od, wall = P.SEATSTAY
-        return lofted_tube([(p, t, od, od) for p, t in zip(pts, tans)], wall)
+        od = P.SEATSTAY[0]
+        return [(p, t, od, od) for p, t in zip(pts, _tangents(pts))]
+
+    def seatstay(self, side):
+        return lofted_tube(self.seatstay_stations(side), P.SEATSTAY[1])
 
     def belt_splitter(self):
         """Bolted splitter sleeve on the drive-side seat stay (belt install)."""

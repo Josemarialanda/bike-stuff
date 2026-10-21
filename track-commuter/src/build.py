@@ -12,6 +12,7 @@ sys.path.insert(0, HERE)
 import drawings  # noqa: E402
 import params as P  # noqa: E402
 import spec  # noqa: E402
+from checks import run_checks  # noqa: E402
 from model3d import FrameModel, v3  # noqa: E402
 from render import render  # noqa: E402
 
@@ -29,6 +30,9 @@ def main():
     model = FrameModel()
     g = model.g
     print(json.dumps(g.summary(), indent=2))
+    clearances = run_checks(model)
+    print(json.dumps(clearances, indent=2))
+    assert clearances["tyre_ok"] and clearances["belt_ok"], "clearance check failed"
 
     print("building 3D frame ...")
     frame = model.build_frame()
@@ -55,8 +59,8 @@ def main():
     drawings.rear_end(model, d2)
 
     print("spec sheet ...")
-    spec.write_csv_json(g, out("spec", f"{tag}_geometry"))
-    spec.write_pdf(g, out("spec", f"{tag}_spec_sheet.pdf"),
+    spec.write_csv_json(g, out("spec", f"{tag}_geometry"), clearances)
+    spec.write_pdf(g, out("spec", f"{tag}_spec_sheet.pdf"), clearances,
                    render_png=out("renders", "frame_three_quarter.png"),
                    drawing_pngs=(d1 + ".png", d2 + ".png"))
     with open(out("cad", "mass_estimate.txt"), "w") as f:

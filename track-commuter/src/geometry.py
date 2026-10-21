@@ -106,11 +106,12 @@ class Geometry:
         # The belt centre distance is BB-to-axle, i.e. the chainstay length.
         return cd
 
-    def brake_bridge(self, cs=None, reach=P.BRAKE_REACH_TARGET):
-        """Point on the seat-stay centreline giving the target caliper reach."""
-        axle = self.rear_axle(cs)
+    def brake_bridge(self):
+        """Point on the seat-stay centreline where the 12.7 mm bridge clears the
+        tyre by BRAKE_BRIDGE_TYRE_GAP with the axle at the front of the slot."""
+        axle = self.rear_axle(P.CHAINSTAY_MIN)
         a, b = self.rear_axle(P.CHAINSTAY_NOMINAL), self.ss_top
-        target = P.RIM_BRAKE_TRACK_RADIUS + reach
+        target = self.tyre_radius + P.BRAKE_BRIDGE_TYRE_GAP + 12.7 / 2
         lo, hi = 0.0, 1.0
         for _ in range(60):
             m = (lo + hi) / 2
@@ -118,7 +119,7 @@ class Geometry:
                 lo = m
             else:
                 hi = m
-        return a + lo * (b - a)
+        return a + hi * (b - a)
 
     def brake_reach(self, cs):
         return float(np.linalg.norm(self.brake_bridge() - self.rear_axle(cs))
@@ -150,8 +151,8 @@ class Geometry:
             })
         return {
             "bb_drop": round(self.bb_drop, 1),
-            "bb_height_25c": round(self.tyre_radius - self.bb_drop, 1),
-            "trail_25c": round(self.trail(), 1),
+            "bb_height": round(self.tyre_radius - self.bb_drop, 1),
+            "trail": round(self.trail(), 1),
             "front_center": round(self.front_center(), 1),
             "wheelbase_at_published_cs": round(self.wheelbase(P.CHAINSTAY_PUBLISHED), 1),
             "effective_top_tube_at_stack": round(self.effective_top_tube(), 1),

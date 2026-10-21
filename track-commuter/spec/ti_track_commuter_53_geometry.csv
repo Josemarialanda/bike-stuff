@@ -1,19 +1,19 @@
 parameter,hektor_published_53,ti_design_53,note
 Stack,498,498.0,kept
 Reach,406,406.0,kept
-Head tube length,120,120.0,kept; ZS44/ZS56 zero-stack cups
+Head tube length,120,105.0,shortened for the taller 35 mm-clearance fork; stack/reach/BB drop unchanged
 Head tube angle,73.5,73.5,kept
 Seat tube angle,75.0,75.0,kept
 Seat tube c-t,530,530.0,BB centre to top of seat tube
 Top tube (horizontal),530,539.4,follows from stack/reach/STA; published value is ~9 mm short in every size
-Chainstay,378,384-400 (nom. 390),horizontal slot; 378 only possible with Hektor's shaped aero seat tube
-Wheelbase,961,967-983 (nom. 973),961 at CS 378 -> geometry matches Hektor exactly
-Standover,793,781,"estimate, 25 mm tyre, at BB"
-BB drop,n/p,48.4,derived (not published); confirmed from product photo
-BB height,n/p,287.6,25 mm tyre
-Fork axle-to-crown,n/p,365.0,design value; incl. lower headset
+Chainstay,378,395-409 (nom. 401.5),horizontal slot; minimum set by 35 mm tyre to round seat tube
+Wheelbase,961,978-992 (nom. 985),longer than Hektor because of the longer chainstay; front centre unchanged
+Standover,793,791,"35 mm tyre, at BB"
+BB drop,n/p,48.3,derived (not published); confirmed from product photo
+BB height,n/p,297.7,35 mm tyre
+Fork axle-to-crown,n/p,380.0,design value incl. lower headset; must clear 35 mm tyres
 Fork offset,n/p,45.0,design value
-Trail,n/p,52.6,25 mm tyre
-Front centre,n/p,588.1,toe overlap ~18 mm w/ 170 cranks
+Trail,n/p,55.6,35 mm tyre
+Front centre,n/p,588.1,toe overlap ~28 mm w/ 170 cranks
 Headset,"1 1/8""",ZS44 / ZS56 tapered,Hektor uses integrated tapered 1 1/8-1.5
 Seatpost,27.2,27.2,reamed Ti sleeve in 31.8 seat tube

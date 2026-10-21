@@ -197,7 +197,7 @@ def side_elevation(model, stem):
     sh.line(ax_nom, g.ss_top)
     sh.line((ax_max[0] - 60, g.bb_drop), (fa[0] + 60, g.bb_drop))
     sh.line((ax_max[0] - 380, ground), (fa[0] + 380, ground), "REFERENCE")
-    # Wheels (25 mm tyres) and axle positions.
+    # Wheels (design tyre) and axle positions.
     for c in (ax_nom, fa):
         sh.circle(c, g.tyre_radius)
         sh.circle(c, P.RIM_BSD / 2)
@@ -235,16 +235,17 @@ def side_elevation(model, stem):
     s = g.summary()
     notes = "\n".join([
         "NOTES",
-        "1. Dimensions to tube centre lines; frame sized for 700c (622) wheels, 25 mm tyres.",
+        f"1. Dimensions to tube centre lines; 700c (622) wheels, clearance for {P.TYRE_WIDTH_DESIGN:g} mm tyres "
+        f"(min {P.TYRE_CLEARANCE_MIN:g} mm gap all round, checked in 3D).",
         f"2. Fit geometry = published Hektor 53 (stack {P.STACK:g}, reach {P.REACH:g}, HTA {P.HEAD_ANGLE}, "
-        f"STA {P.SEAT_ANGLE}). BB drop {s['bb_drop']} derived for a {P.FORK_AXLE_TO_CROWN:g}/{P.FORK_OFFSET:g} fork.",
+        f"STA {P.SEAT_ANGLE}). Head tube {P.HEAD_TUBE_LEN:g} (pub. 120) for a {P.FORK_AXLE_TO_CROWN:g}/"
+        f"{P.FORK_OFFSET:g} fork; BB drop {s['bb_drop']} as Hektor.",
         f"3. Horizontal TT measures {s['effective_top_tube_at_stack']:.0f} at stack height; published 530 is "
         "inconsistent with published stack/reach/STA (same 9-10 mm in all sizes).",
-        f"4. Rear axle slot: chainstay {P.CHAINSTAY_MIN:g}-{P.CHAINSTAY_MAX:g}. 60T/22T + 113T belt sits at "
-        f"{s['belt_cs_60_22']}. WB {s['wheelbase_at_published_cs']:.0f} at published CS 378 (not reachable "
-        "with round seat tube).",
-        f"5. Trail {s['trail_25c']} mm. Toe overlap approx. {s['toe_overlap_est']:.0f} mm "
-        "(170 cranks) - normal for track geometry.",
+        f"4. Rear axle slot: chainstay {P.CHAINSTAY_MIN:g}-{P.CHAINSTAY_MAX:g} (min set by tyre/seat tube). "
+        f"{P.FRONT_TEETH}T/{P.REAR_TEETH_FREEWHEEL}T + {P.BELT_TEETH}T belt sits at {s['belt_cs_60_22']}.",
+        f"5. Trail {s['trail']} mm. Toe overlap approx. {s['toe_overlap_est']:.0f} mm "
+        "(170 cranks) - expected with track geometry and large tyres.",
         "6. Fork, wheels and sprockets shown as reference only (phantom). DXF is 1:1 - do not scale the PDF.",
     ])
     sh.frame_and_title(notes)
@@ -280,10 +281,11 @@ def rear_end(model, stem):
         sh.msp.add_lwpolyline([(xa, zy(bz0)), (xb, zy(bz0)), (xb, zy(bz1)), (xa, zy(bz1))],
                               close=True, dxfattribs={"layer": "REFERENCE"})
     sh.text("BELT LINE (Gates CDX 12 mm)", (r_ring + 10, zy(P.CHAINLINE)))
-    sh.text("TYRE 25-622 ENVELOPE", (ax_nom[0] + 40, zy(-hw) - 6))
+    sh.text(f"TYRE {P.TYRE_WIDTH_DESIGN:g}-622 ENVELOPE", (ax_nom[0] + 40, zy(-hw) - 6))
     # Dimensions.
-    sh.dim_linear((ax_nom[0], zy(60)), (ax_nom[0], zy(-60)), (ax_nom[0] - 55, 0), angle=90,
-                  text="<> OLD (track hub)")
+    half = P.REAR_SPACING / 2
+    sh.dim_linear((ax_nom[0], zy(half)), (ax_nom[0], zy(-half)), (ax_nom[0] - 55, 0), angle=90,
+                  text="<> OLD (solid axle hub)")
     sh.dim_linear((30, zy(0)), (30, zy(P.CHAINLINE)), (125, 0), angle=90, text="<> chainline")
     sh.dim_linear((0, zy(34)), (0, zy(-34)), (80, 0), angle=90, text="<> BSA shell")
     zs = P.STAY_DROPOUT_Z
@@ -291,8 +293,9 @@ def rear_end(model, stem):
                   text="<> stays c-c at dropout")
     cz = P.CHAINSTAY_BB_Z
     sh.dim_linear((-8, zy(cz)), (-8, zy(-cz)), (-45, 0), angle=90, text="<> CS c-c at BB")
-    sh.dim_linear((-110, zy(24.5 - 8)), (-110, zy(-24.5 + 8)), (-150, 0), angle=90,
-                  text="<> CS gap (16 wide crimp)")
+    zt, ow = P.CHAINSTAY_TYRE_ZONE_Z, P.CHAINSTAY_OVAL[0]
+    sh.dim_linear((-110, zy(zt - ow / 2)), (-110, zy(-zt + ow / 2)), (-150, 0), angle=90,
+                  text=f"<> CS gap ({ow:g} wide crimp)")
 
     # Dropout detail (side view, drive side), shifted below the plan view.
     dy = -230.0
@@ -312,18 +315,23 @@ def rear_end(model, stem):
                   (a_min[0] + 20 + dx, g.bb_drop + dy + P.AXLE_SLOT_WIDTH / 2),
                   (a_min[0] + 75 + dx, 0), angle=90, text="<> slot")
     sh.text("DROPOUT DETAIL (DRIVE SIDE, OUTSIDE VIEW)\n6Al-4V plate, 6 mm, horizontal rear-facing slot\n"
-            "Axle marks: CS 384 / 390 (stock belt) / 400", (a_max[0] - 40 + dx, g.bb_drop + dy + 75))
+            f"Axle marks: CS {P.CHAINSTAY_MIN:g} / {P.CHAINSTAY_NOMINAL:g} ({P.BELT_TEETH}T belt) / "
+            f"{P.CHAINSTAY_MAX:g}", (a_max[0] - 40 + dx, g.bb_drop + dy + 75))
     sh.text("PLAN VIEW FROM ABOVE (front to the right, drive side down)", (-430, zy(-95)))
 
+    reach_lo = g.brake_reach(P.CHAINSTAY_MIN)
+    reach_hi = g.brake_reach(P.CHAINSTAY_MAX)
     notes = "\n".join([
         "NOTES",
-        "1. Chainstays 22.2 x 0.9 crimped to 16 x 27 oval from BB to 110 mm behind BB "
-        "(clears 25 mm tyre AND 60T belt ring at 42.5 chainline).",
-        "2. Stays run at 63 mm from centre plane for the first 85 mm above/ahead of the dropout so "
-        "the belt clears the drive-side stays.",
+        f"1. Chainstays {P.CHAINSTAY[0]} x {P.CHAINSTAY[1]} crimped to {P.CHAINSTAY_OVAL[0]:g} x "
+        f"{P.CHAINSTAY_OVAL[1]:g} oval from BB to 110 mm behind BB (clears {P.TYRE_WIDTH_DESIGN:g} mm tyre "
+        f"AND {P.FRONT_TEETH}T belt ring at {P.CHAINLINE:g} chainline).",
+        f"2. Stays run at {P.STAY_DROPOUT_Z:g} mm from centre plane near the dropout so the belt and rear "
+        "cog clear the drive-side stays.",
         "3. Belt drive requires a frame split: bolted splitter in the drive-side seat stay (shown), "
         "or a split dropout per builder's standard.",
-        "4. Rear brake bridge: 12.7 x 1.0 tube, 6 mm bolt hole; reach 47-57 mm over slot (long-reach caliper).",
+        f"4. Rear brake bridge: 12.7 x 1.0 tube, 6 mm bolt hole, {P.BRAKE_BRIDGE_TYRE_GAP:g} mm above the "
+        f"tyre; caliper reach {reach_lo:.0f}-{reach_hi:.0f} mm over the slot.",
     ])
     sh.frame_and_title(notes)
     sh.save(stem)

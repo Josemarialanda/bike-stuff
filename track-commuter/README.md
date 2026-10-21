@@ -12,7 +12,7 @@ builder still does their own production engineering.
 | File | Format | What it is |
 |---|---|---|
 | `cad/ti_track_commuter_53_frame.step` | STEP AP214 | 3D frame solid, mm. **Main file.** |
-| `cad/ti_track_commuter_53_assembly_reference.step` | STEP | Frame + reference fork, wheels and belt sprockets (for clearance checks) |
+| `cad/ti_track_commuter_53_assembly_reference.step` | STEP | Frame + reference fork, 35 mm-tyre wheels and belt sprockets |
 | `cad/ti_track_commuter_53_frame.stl` | STL | Mesh, for quick viewing or 3D printing a model |
 | `drawings/*_sheet1_side_elevation.{dxf,pdf,svg}` | DXF 1:1 / PDF A3 1:5 | Side elevation: all geometry dimensions |
 | `drawings/*_sheet2_rear_end.{dxf,pdf,svg}` | DXF 1:1 / PDF A3 1:2 | Rear plan view (spacing, chainline, tyre/belt clearance) + dropout detail |
@@ -26,42 +26,55 @@ mm; don't scale off the PDFs.
 
 | | Hektor 53 (published) | This frame |
 |---|---|---|
+| Tyre clearance | 25 mm stock | **35 mm, with ≥ 4 mm gap all round** |
 | Stack / Reach | 498 / 406 | 498 / 406 |
 | Head angle / Seat angle | 73.5° / 75° | 73.5° / 75° |
-| Head tube | 120 | 120 (ZS44/ZS56 tapered) |
+| Head tube | 120 | 105 (ZS44/ZS56 tapered) |
 | Seat tube c-t | 530 | 530 |
-| Chainstay | 378 | 384–400 slot (390 with stock belt) |
-| Wheelbase | 961 | 967–983 (961 at CS 378) |
-| BB drop / height | not published | 48.4 / 287.6 (25 mm tyre) |
-| Fork | tapered carbon | any tapered fork, 365 A-C, 45 offset |
-| Trail | not published | 52.6 |
-| Frame mass (est.) | 6061 Al | ~1.65 kg Ti, bare |
+| Chainstay | 378 | 395–409 slot (401.5 with 60/22 + 115T belt) |
+| Wheelbase | 961 | 978–992 (984.7 nominal) |
+| BB drop / height | not published | 48.3 / 297.7 (35 mm tyre) |
+| Rear hub / chainline | 120 track / ~42 | 135 solid axle / 50 |
+| Fork | tapered carbon, 25 mm tyres | tapered, 380 A-C, 45 offset, 35 mm clearance |
+| Trail | not published | 55.6 (35 mm tyre) |
+| Frame mass (est.) | 6061 Al | ~1.64 kg Ti, bare |
 
 ## Decisions and deviations from the Hektor (please read)
 
 1. **Geometry source.** The table comes from Schindelhauer's own site data
-   (`reference/hektor_source_data.json`). BB drop and fork dimensions aren't published. 48 mm drop
-   with a 365 mm / 45 mm fork reproduces the published 961 mm wheelbase exactly and matches a
-   measurement of the side-on product photo.
+   (`reference/hektor_source_data.json`). BB drop and fork dimensions aren't published. A 48 mm
+   drop with a 365 mm / 45 mm fork reproduces Hektor's published 961 mm wheelbase exactly and
+   matches a measurement of the side-on product photo. This frame keeps that drop.
 2. **Top tube.** The published horizontal top tube (530) doesn't agree with the published
    stack/reach/seat angle. The same 9–10 mm gap appears in every size. Stack and reach were kept,
    because fit and handling depend on them, which gives 539 mm at stack height.
-3. **Chainstay.** 378 mm only works with Hektor's shaped aero seat tube. With a round 31.8 mm
-   titanium seat tube, a 25 mm tyre needs at least 384 mm. The stock 60T/22T gearing with a 113T
-   belt lands at 390 mm anyway. The horizontal slot covers 384–400.
-4. **Titanium construction.** Round 3Al-2.5V tubes replace the hydroformed aluminium. The machined
-   head tube, BB shell and dropouts are 6Al-4V. Chainstays are crimped to a 16 mm-wide oval near
-   the BB so a 25 mm tyre and the 60T belt ring both fit at a 42.5 mm track chainline. Seat stays
-   stay wide for 85 mm above the dropout so the belt clears them.
-5. **Belt drive needs a frame split.** Hektor uses a patented "Belt Port" in the dropout. This
+3. **35 mm tyre clearance.** This changes five things. `python src/checks.py` measures every gap
+   in 3D, and the build fails if one drops below target.
+   - *Chainstay 395–409.* A 35 mm tyre needs the axle at least 395 mm from the BB to clear a round
+     31.8 mm seat tube. Hektor runs 378 with 25 mm tyres. The stock 113T belt is now too short;
+     use 115T, which with 60/22 lands at 401.5.
+   - *135 mm hub, 50 mm chainline.* At a 42.5 mm track chainline there's no room for a chainstay
+     between a 35 mm tyre and the 60T belt ring. At 50 mm, the chainstays (crimped to a 16 mm-wide
+     oval) clear the tyre by 6 mm and the ring by 4.5 mm.
+   - *Fork 380 A-C, head tube 105.* A 35 mm tyre needs a taller fork. Shortening the head tube
+     15 mm keeps stack, reach, head angle and BB drop the same as Hektor. Trail rises 3 mm because
+     of the bigger tyre.
+   - *Seat stays* stay wide past the tyre and converge late.
+   - *Brake bridge* sits 4 mm above the tyre, so the caliper reach is 48–57 mm over the slot.
+4. **Brakes.** Most road rim calipers don't clear 35 mm tyres, so check the caliper or switch to
+   disc brakes. Disc brakes with horizontal dropouts need sliding dropouts, a different rear end.
+   This is listed as an open item.
+5. **Titanium construction.** Round 3Al-2.5V tubes replace the hydroformed aluminium. The machined
+   head tube, BB shell and dropouts are 6Al-4V.
+6. **Belt drive needs a frame split.** Hektor uses a patented "Belt Port" in the dropout. This
    design uses a bolted splitter in the drive-side seat stay instead, a standard titanium
    belt-drive solution. The builder can swap in their preferred splitter.
-6. **Headset.** Hektor has an integrated tapered headset. Titanium builders normally machine a
+7. **Headset.** Hektor has an integrated tapered headset. Titanium builders normally machine a
    ZS44/ZS56 tapered head tube, which takes the same 1 1/8"–1.5" tapered forks.
-7. **No Schindelhauer branding or patented details** are reproduced.
+8. **No Schindelhauer branding or patented details** are reproduced.
 
 Open items to agree with the builder are listed at the end of the spec sheet (tube butting,
-splitter style, exact hub/crank/sprocket part numbers, 28 mm tyre option, commuter mounts).
+splitter style, hub/crank/sprockets for the 50 mm chainline, brakes, fork, commuter mounts).
 
 ## Changing the design
 
@@ -75,12 +88,14 @@ python src/build.py
 ```
 
 The build regenerates the STEP/STL, drawings, renders and spec sheet (about 2 minutes) and prints
-the derived geometry and clearance checks (`python src/geometry.py` prints just those).
+the derived geometry and clearance checks (`python src/geometry.py` and `python src/checks.py` print
+just those).
 
 | Module | Role |
 |---|---|
 | `src/params.py` | All inputs (published geometry, design choices, tube set) |
-| `src/geometry.py` | Solves key points, BB drop, trail, wheelbase, belt length, tyre and brake checks |
+| `src/geometry.py` | Solves key points, BB drop, trail, wheelbase, belt length, brake reach |
+| `src/checks.py` | 3D clearance checks: tyre and belt/sprockets vs. every tube |
 | `src/model3d.py` | CadQuery/OpenCascade solid model with coped tube joints |
 | `src/drawings.py` | DXF/PDF/SVG drawings from hidden-line projections of the model |
 | `src/spec.py` | Spec sheet PDF + CSV/JSON |

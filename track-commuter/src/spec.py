@@ -20,24 +20,26 @@ def geometry_rows(g):
         # (parameter, published Hektor 53, this design, note)
         ("Stack", pub["Stack (J)"], P.STACK, "kept"),
         ("Reach", pub["Reach (I)"], P.REACH, "kept"),
-        ("Head tube length", pub["Head tube (C)"], P.HEAD_TUBE_LEN, "kept; ZS44/ZS56 zero-stack cups"),
+        ("Head tube length", pub["Head tube (C)"], P.HEAD_TUBE_LEN,
+         "shortened for the taller 35 mm-clearance fork; stack/reach/BB drop unchanged"),
         ("Head tube angle", pub["Head angle (E)"], P.HEAD_ANGLE, "kept"),
         ("Seat tube angle", pub["Seat angle (F)"], P.SEAT_ANGLE, "kept"),
         ("Seat tube c-t", pub["Seat tube c-t (A)"], P.SEAT_TUBE_CT, "BB centre to top of seat tube"),
         ("Top tube (horizontal)", pub["Top tube horiz. (B)"], s["effective_top_tube_at_stack"],
          "follows from stack/reach/STA; published value is ~9 mm short in every size"),
         ("Chainstay", pub["Chainstay (D)"], f"{P.CHAINSTAY_MIN:g}-{P.CHAINSTAY_MAX:g} (nom. {P.CHAINSTAY_NOMINAL:g})",
-         "horizontal slot; 378 only possible with Hektor's shaped aero seat tube"),
+         f"horizontal slot; minimum set by {P.TYRE_WIDTH_DESIGN:g} mm tyre to round seat tube"),
         ("Wheelbase", pub["Wheelbase (G)"],
          f"{s['chainstay_positions'][0]['wheelbase']:.0f}-{s['chainstay_positions'][2]['wheelbase']:.0f} "
          f"(nom. {s['chainstay_positions'][1]['wheelbase']:.0f})",
-         f"{s['wheelbase_at_published_cs']:.0f} at CS 378 -> geometry matches Hektor exactly"),
-        ("Standover", pub["Standover (H)"], round(s["standover_est"]), "estimate, 25 mm tyre, at BB"),
+         "longer than Hektor because of the longer chainstay; front centre unchanged"),
+        ("Standover", pub["Standover (H)"], round(s["standover_est"]), f"{P.TYRE_WIDTH_DESIGN:g} mm tyre, at BB"),
         ("BB drop", "n/p", s["bb_drop"], "derived (not published); confirmed from product photo"),
-        ("BB height", "n/p", s["bb_height_25c"], "25 mm tyre"),
-        ("Fork axle-to-crown", "n/p", P.FORK_AXLE_TO_CROWN, "design value; incl. lower headset"),
+        ("BB height", "n/p", s["bb_height"], f"{P.TYRE_WIDTH_DESIGN:g} mm tyre"),
+        ("Fork axle-to-crown", "n/p", P.FORK_AXLE_TO_CROWN,
+         f"design value incl. lower headset; must clear {P.TYRE_WIDTH_DESIGN:g} mm tyres"),
         ("Fork offset", "n/p", P.FORK_OFFSET, "design value"),
-        ("Trail", "n/p", s["trail_25c"], "25 mm tyre"),
+        ("Trail", "n/p", s["trail"], f"{P.TYRE_WIDTH_DESIGN:g} mm tyre"),
         ("Front centre", "n/p", s["front_center"], f"toe overlap ~{s['toe_overlap_est']:.0f} mm w/ 170 cranks"),
         ("Headset", pub["Headset"], "ZS44 / ZS56 tapered", "Hektor uses integrated tapered 1 1/8-1.5"),
         ("Seatpost", pub["Seatpost"], P.SEATPOST_DIA, "reamed Ti sleeve in 31.8 seat tube"),
@@ -62,17 +64,21 @@ TUBES = [
 ]
 
 INTERFACES = [
-    ("Wheels / tyres", "700c (622). Designed and checked for 25 mm (stock Ultrasport III 25-622)."),
-    ("Rear hub", f"{P.REAR_SPACING:g} mm OLD track hub, 3/8\" or 10 mm solid axle, horizontal dropouts."),
+    ("Wheels / tyres", f"700c (622). Clearance for {P.TYRE_WIDTH_DESIGN:g}-622 tyres with at least "
+                       f"{P.TYRE_CLEARANCE_MIN:g} mm all round (checked in 3D). Stock Hektor: 25-622."),
+    ("Rear hub", f"{P.REAR_SPACING:g} mm OLD solid-axle hub (fixed/flip-flop or singlespeed freewheel), "
+                 "3/8\" or 10 mm axle, horizontal dropouts. Rear sprocket must sit at the chainline below."),
     ("Drivetrain", f"Gates Carbon Drive CDX, {P.FRONT_TEETH}T front, {P.REAR_TEETH_FREEWHEEL}T (9-spline freewheel) "
                    f"or {P.REAR_TEETH_FIXED}T (track thread fixed), {P.BELT_TEETH}T belt, chainline {P.CHAINLINE} mm."),
     ("Frame split", "Required for belt: bolted splitter in drive-side seat stay (or split dropout)."),
     ("Bottom bracket", "BSA / English threaded 68 mm, external cups (stock: Hollow-Axle 170 mm cranks)."),
     ("Headset / fork", "ZS44/ZS56 tapered head tube; any 1 1/8\"-1.5\" tapered carbon fork, "
-                       f"{P.FORK_AXLE_TO_CROWN:g} mm A-C, {P.FORK_OFFSET:g} mm offset, drilled for a rim brake."),
+                       f"{P.FORK_AXLE_TO_CROWN:g} mm A-C, {P.FORK_OFFSET:g} mm offset, clearance for "
+                       f"{P.TYRE_WIDTH_DESIGN:g} mm tyres."),
     ("Seatpost / clamp", "27.2 mm post; 31.8 mm external seat collar."),
-    ("Brakes", "Rear rim-brake bridge for long-reach (47-57 mm) caliper; front through fork crown. "
-               "Fixed-gear build can omit both (bridge is harmless)."),
+    ("Brakes", "Rear rim-brake bridge (recessed-nut caliper, reach range in section 2). Most road calipers "
+               "do not clear 35 mm tyres: check the caliper's tyre clearance, or change to disc brakes "
+               "(needs sliding dropouts - see open items). Fixed-gear build can run without."),
     ("Cable routing", "Rear brake internal through top tube: 6 mm ports 45 mm from each end, non-drive side."),
     ("Mounts", f"2 bottle bosses on down tube, {P.BOTTLE_BOSS_SPACING:g} mm spacing, "
                f"lower at {P.BOTTLE_BOSS_FROM_BB:g} mm from BB centre."),
@@ -83,21 +89,24 @@ BUILD_NOTES = [
     "Post-weld: face & chase BB, face/ream head tube bores to ZS44/ZS56, ream seat tube to 27.2.",
     "Rear dropouts must be parallel and coplanar (belt drive is intolerant of misalignment): "
     "check rear triangle alignment to +/-0.5 mm and dropout faces parallel within 0.2 mm.",
-    "Belt line: rear cog and front ring must align within 0.5 mm at 42.5 mm chainline - "
+    f"Belt line: rear cog and front ring must align within 0.5 mm at {P.CHAINLINE:g} mm chainline - "
     "confirm with the actual hub/crank before welding the chainstays.",
     "Finish: brushed or bead-blasted raw titanium (no paint). No branding of Schindelhauer.",
 ]
 
 OPEN_ITEMS = [
     "Builder to confirm tube gauges/butting and the chainstay crimp (or substitute a machined yoke).",
-    "28 mm tyres would need a wider chainline or a yoke; the current layout is checked for 25 mm.",
-    "Confirm hub (flip-flop or freewheel), crank and Gates sprocket part numbers so the chainline is exact.",
+    f"Confirm a {P.REAR_SPACING:g} mm hub, crank and Gates sprockets that give the {P.CHAINLINE:g} mm "
+    "chainline; the chainstay/belt gaps are designed around it.",
+    "Brakes for 35 mm tyres: confirm a rim caliper that clears them, or switch to disc brakes with "
+    "sliding dropouts (keeps belt tensioning) and a disc fork.",
+    "Fork: needs 35 mm tyre clearance at the stated A-C/offset (many such forks are disc-only).",
     "Pick the splitter style the builder prefers (seat-stay coupler vs. split dropout).",
     "Optional for a commuter: mudguard eyelets, rack mounts, dynamo routing - not included yet.",
 ]
 
 
-def write_csv_json(g, stem):
+def write_csv_json(g, stem, clearances):
     rows = geometry_rows(g)
     with open(f"{stem}.csv", "w", newline="") as f:
         w = csv.writer(f)
@@ -108,6 +117,7 @@ def write_csv_json(g, stem):
         "units": "mm / degrees",
         "geometry": [dict(zip(["parameter", "hektor_published", "design", "note"], r)) for r in rows],
         "derived": g.summary(),
+        "clearances_mm": clearances,
         "tubes": [dict(zip(["tube", "material", "size", "note"], t)) for t in TUBES],
         "interfaces": dict(INTERFACES),
         "published_all_sizes": [dict(zip(P.PUBLISHED_COLUMNS, r)) for r in P.PUBLISHED],
@@ -129,7 +139,7 @@ def _table(rows, widths, header=True):
     return t
 
 
-def write_pdf(g, path, render_png=None, drawing_pngs=()):
+def write_pdf(g, path, clearances, render_png=None, drawing_pngs=()):
     styles = getSampleStyleSheet()
     doc = SimpleDocTemplate(path, pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
                             topMargin=15 * mm, bottomMargin=15 * mm,
@@ -149,13 +159,21 @@ def write_pdf(g, path, render_png=None, drawing_pngs=()):
 
     sm = g.summary()
     s.append(Paragraph("2. Rear axle position (horizontal track ends)", styles["Heading2"]))
-    rows = [("Chainstay", "Wheelbase", "Seat-tube / tyre gap (25 mm)", "Rear brake reach")]
+    rows = [("Chainstay", "Wheelbase", f"Seat-tube / tyre gap ({P.TYRE_WIDTH_DESIGN:g} mm)", "Rear brake reach")]
     for r in sm["chainstay_positions"]:
         rows.append((r["chainstay"], r["wheelbase"], r["seat_tube_tyre_gap"], r["rear_brake_reach"]))
     s.append(_table(rows, [40 * mm, 40 * mm, 50 * mm, 50 * mm]))
     s.append(Paragraph(
         f"Belt centre distance with a {P.BELT_TEETH}T belt: {sm['belt_cs_60_22']} mm (60/22 freewheel), "
         f"{sm['belt_cs_60_21']} mm (60/21 fixed). Both sit inside the slot.", styles["BodyText"]))
+
+    s.append(Paragraph("Clearance checks (3D model, mm)", styles["Heading3"]))
+    s.append(Paragraph(
+        f"Design tyre {P.TYRE_WIDTH_DESIGN:g}-622 (torus, {P.TYRE_HEIGHT_DESIGN:g} mm tall). Targets: tyre "
+        f"{P.TYRE_CLEARANCE_MIN:g} mm, belt/sprockets {P.BELT_CLEARANCE_MIN:g} mm. 'min'/'max' = axle at "
+        "front/rear of the slot.", styles["BodyText"]))
+    rows = [("Check", "Gap")] + [(k.replace("_", " "), v) for k, v in clearances.items()]
+    s.append(_table(rows, [90 * mm, 40 * mm]))
 
     s.append(PageBreak())
     s.append(Paragraph("3. Tube set (proposal - builder to confirm)", styles["Heading2"]))
